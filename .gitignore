@@ -1,0 +1,12 @@
+.venv
+*.tsv
+*.json
+*pdf
+test*
+
+.DS_Store
+
+__pycache__
+dashboard
+utilities_
+layouts.py
