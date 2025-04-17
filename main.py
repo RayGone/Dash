@@ -27,7 +27,8 @@ template = 'cerulean'
 dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.2/dbc.min.css")
 app = dash.Dash(
     __name__,
-    external_stylesheets=[theme, dbc.icons.FONT_AWESOME, dbc_css]
+    external_stylesheets=[theme, dbc.icons.FONT_AWESOME, dbc_css],
+    title="Dashboard App"
 )
 
 # from plotly.io import templates
@@ -39,15 +40,15 @@ app.layout = dbc.Container([
             dbc.Col(),
             dbc.Col(html.H1("Dashboard", className='display-3 text-center')),
             dbc.Col(html.Div([
-                    html.A(href="https://github.com/RayGone/Dash", target="_blank",className='fa-brands fa-github fa-bounce me-3', style={"fontSize":"20px", "cursor": "pointer"}),
+                    html.A(href="https://github.com/RayGone/Dash", target="_blank", title='Check Github', className='fa-brands fa-github fa-bounce me-3', style={"fontSize":"20px", "cursor": "pointer"}),
                     dbc.Label(class_name="fa fa-moon pe-2", html_for="switch"),
                     dbc.Switch( id="switch", value=True, class_name="d-inline-block", persistence=True),
                     dbc.Label(class_name="fa fa-sun", html_for="switch"),
                     
                     dbc.Button("Refresh", id='refresh', class_name="ms-3", color='primary', size='sm')
                 ], className='d-inline-block float-end d-print-none', style={"whiteSpace":"nowrap"}), align='center')
-        ],align='center', justify='between', key='row1'),
-        dbc.Row(dbc.Col(html.Hr())),
+        ],align='center', justify='between', key='row1', class_name='sticky-top shadow-sm mb-3 bg-body'),
+
         dbc.Row([
             dbc.Col(dbc.Label("Task Priority: ",class_name="me-2"), class_name="col-md-1 col-sm-2"), 
             dbc.Col([DropDown("plist", value_list=task_priority, persistance=True)], class_name='col-md-5 col-sm-10'),
@@ -59,7 +60,7 @@ app.layout = dbc.Container([
             dbc.Col(
                 dbc.Card([
                     dbc.CardBody(dcc.Loading(dcc.Graph(id='chart1', className='bg-primary', config=graph_config)))
-                ]), class_name="col-lg-6"),
+                ]), class_name="col-lg-6", width=6, sm=12),
             dbc.Col(
                 dbc.Card(dbc.CardBody(dcc.Loading(dcc.Graph(id='chart2', className='bg-primary', config=graph_config)))),
                 class_name='col-lg-6', width=6, sm=12)
@@ -145,7 +146,7 @@ def chart3(_, mode, priority, difficulty):
                  color_discrete_map=difficulty_color_map, title="Contract Assignements<br><sub>Total Contracts: {}</sub>".format(data.shape[0]))
     fig.update_layout({"barcornerradius": 4})
     fig.update_layout(
-        xaxis_title_font=dict(size=8),  # X-axis title size
+        # xaxis_title_font=dict(size=8),  # X-axis title size
         xaxis_tickfont=dict(size=10),    # X-axis tick labels size
     )
     return fig
@@ -195,5 +196,6 @@ clientside_callback(
     Input("switch", "value"),
 )
 
+server = app.server
 if __name__ == "__main__":
     app.run(debug=isDebug())
