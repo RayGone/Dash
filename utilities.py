@@ -18,6 +18,12 @@ graph_config = {
 }
 
 task_priority = ['Immediate', 'Priority 1', 'Priority 2', 'Priority 3', 'Hold Off']
+task_priority_color_map = {
+    'Priority 1': 'indianred',
+    'Priority 2': 'orange',
+    'Priority 3': 'cornflowerblue',
+    'Immediate': 'darkred'
+}
 
 def DropDown(id, value_list=[], placeholder="", style={}, className="", default_value = "all", isSearchable=True, persistance=False ):
     return dcc.Dropdown(id=id,
