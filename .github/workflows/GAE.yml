@@ -1,0 +1,38 @@
+name: Deploy to GCloud App Engine
+# This workflow will build and deploy the application to GCloud App Engine
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # environment: 'GAE'
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository - ${{ secrets.GCLOUD_PROJECT_ID }}
+        uses: actions/checkout@v4
+
+      - name: 'Google Cloud Authentication With Service Account Key JSON'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: 'latest'
+          project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+
+      # - name: 'Check GCLOUD CLI'
+      #   run: 'gcloud info'
+
+      - name: Deploy to GCloud App Engine
+        run: gcloud app deploy app.yaml --project=$GCLOUD_PROJECT_ID --quiet
+        env:
+          GCLOUD_PROJECT_ID: ${{ secrets.GCLOUD_PROJECT_ID }}

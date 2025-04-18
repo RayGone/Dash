@@ -3,6 +3,7 @@
 *.json
 *pdf
 test*
+.git*
 
 .DS_Store
 
