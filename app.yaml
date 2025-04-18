@@ -1,0 +1,12 @@
+runtime: python311
+service: default
+entrypoint: gunicorn --workers 1 -b 0.0.0.0:$PORT main:server
+env_variables:
+  debug: 0
+
+handlers:
+  # This handler routes all requests not caught above to your main app. It is
+  # required when static routes are defined, but can be omitted (along with
+  # the entire handlers section) when there are no static files defined.
+- url: /.*
+  script: auto
