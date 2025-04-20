@@ -4,12 +4,13 @@ load_dotenv()
 # Import required libraries
 import os
 import datetime
+import time
 
 import pandas as pd
 import dash
 from dash import html
 from plotly import express as px
-from dash import dcc, clientside_callback
+from dash import dcc, clientside_callback, Patch
 from dash.dependencies import Input, Output, State
 
 ##========================================
@@ -18,11 +19,13 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from utilities import difficulty, difficulty_color_map, graph_config, DropDown, \
-    task_priority, task_priority_color_map, filterByColumn, isDebug
+    task_priority, task_priority_color_map, filterByColumn, isDebug, topContracts
 
 theme = dbc.themes.CERULEAN
 load_figure_template(['cerulean', 'cerulean_dark'])
 template = 'cerulean'
+map_styles = ['open-street-map', 'carto-darkmatter']
+states = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'NT', 'ACT']
 
 dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.2/dbc.min.css")
 app = dash.Dash(
@@ -33,6 +36,8 @@ app = dash.Dash(
 
 # from plotly.io import templates
 # print(list(templates))
+### Alternative is to use Dash Leaflet - But on App Engine additional packages may limit Free Tier usage.
+australian_center = {"lat": -22.867313536366957, "lon": 133.9434557416898}
 
 app.layout = dbc.Container([
         dcc.Store(id='theme', data="plotly_white"),
@@ -64,12 +69,34 @@ app.layout = dbc.Container([
             dbc.Col(
                 dbc.Card(dbc.CardBody(dcc.Loading(dcc.Graph(id='chart2', className='bg-primary', config=graph_config)))),
                 class_name='col-lg-6', width=6, sm=12)
-        ], class_name='g-2', key='row3'),
+        ], class_name='g-2', key='row3', style={"minHeight":"300px"}),
         html.Br(),
-        dbc.Row(
-            dbc.Col(
-                dbc.Card(dbc.CardBody(dcc.Loading(dcc.Graph(id='chart3', className='bg-primary', config=graph_config))))),
-            key='row4', align='center', justify='start'),
+        dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            dbc.Row([
+                                dbc.Col([
+                                    dbc.Label("Show Assignments: ", className='display-7 pe-2'),
+                                    dcc.RadioItems(id='chart3-options', value='all', inline=True,
+                                        options=[{'label': 'All', 'value': 'all'},
+                                                {'label': 'Top 10', 'value': '10'},
+                                                {'label': 'Top 20', 'value': '20'}], 
+                                        labelClassName='me-2 border border-start-0 pe-2 py-1', inputClassName='form-check-input me-2')
+                                    ], className='d-inline-flex flex-row align-items-center'),
+                                dbc.Col([
+                                    dbc.Label("State: ", className='display-7 pe-2 ps-2'),
+                                    DropDown("chart3-states", value_list=states, default_value="All", persistance=True, style={"width":"200px"})
+                                ], className='d-inline-flex flex-row align-items-center')
+                            ])),
+                        dbc.CardBody([
+                            dcc.Loading(dcc.Graph(id='chart3a', className='bg-primary', config=graph_config)),
+                            html.Hr(),
+                            dcc.Loading(dcc.Graph(id='chart3b', className='bg-primary', config=graph_config))
+                        ])
+                    ]),
+                width=12),
+            ], class_name="g-2", key='row4', align='center', justify='start', style={"minHeight":"300px"}),
         
         html.Hr(),
         dbc.Row([
@@ -86,12 +113,12 @@ app.layout = dbc.Container([
                 dbc.Card([
                     dbc.CardBody(dcc.Loading(dcc.Graph(id='chart5', className='bg-primary', config=graph_config)))
                 ]), class_name="col-lg-6", width=6, sm=12)
-        ], class_name='g-2', key='row6'),
+        ], class_name='g-2', key='row6', style={"minHeight":"300px"}),
         html.Br(),
         dbc.Row(
             dbc.Col(
                 dbc.Card(dbc.CardBody(dcc.Loading(dcc.Graph(id='chart6', className='bg-primary', config=graph_config))))),
-            key='row7', align='center', justify='start'),
+            key='row7', align='center', justify='start', style={"minHeight":"300px"}),
         html.Div(className='mb-5', style={'height': '20px', 'width':"100%"})
     ], fluid=True, class_name='dbc')
 
@@ -129,27 +156,80 @@ def chart2(_, mode, priority, difficulty):
     data = data['Work Type'].value_counts().to_frame().reset_index()
     fig = px.bar(data, x='Work Type', y='count', template=mode, text_auto=True,
                  color_discrete_map=difficulty_color_map, title="Assignment Types")
-    fig.update_layout({"barcornerradius": 4})
+    fig.update_layout({
+        "barcornerradius": 4,
+        "margin":{"r":10}})
     return fig
     raise dash.exceptions.PreventUpdate()
 
-@app.callback(Output('chart3', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'), 
-              Input("plist", 'value'),  Input("diff-list", 'value'))
-def chart3(_, mode, priority, difficulty):
+@app.callback(Output('chart3a', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'), 
+              Input('chart3-options', 'value'), Input('chart3-states', 'value'), Input("plist", 'value'),  Input("diff-list", 'value'))
+def chart3a(_, mode, show, state, priority, difficulty):
     ## Or Make an API call here
     data = pd.read_csv('data.csv')    
     data = filterByColumn(data, 'Task Priority', priority)
-    data = filterByColumn(data, 'Difficulty', difficulty)
-        
+    data = filterByColumn(data, 'Difficulty', difficulty)    
     data = data['Contract'].value_counts().to_frame().reset_index().sort_values(by='Contract')
-    fig = px.bar(data, x='Contract', y='count', template=mode,
-                 color_discrete_map=difficulty_color_map, title="Contract Assignements<br><sub>Total Contracts: {}</sub>".format(data.shape[0]))
+    total = data.shape[0]
+    
+    sites = pd.read_csv('sites.csv')
+    data = data.merge(sites, how='inner', right_on='sites', left_on='Contract')
+    if state != 'all':
+        data = data[data['state'].str.lower() == state.lower()]
+    
+    data, ts = topContracts(data, show)
+    data = data.rename(columns={'count':'Assignments'})
+    
+    fig = px.bar(data, x='Contract', y='Assignments', template=mode,
+                 color_discrete_map=difficulty_color_map, title="Contract Assignements{}<br><sub>Total Contracts: {}</sub>".format(ts, total))
     fig.update_layout({"barcornerradius": 4})
     fig.update_layout(
         # xaxis_title_font=dict(size=8),  # X-axis title size
         xaxis_tickfont=dict(size=10),    # X-axis tick labels size
+        margin={"r":10},
     )
     return fig
+
+@app.callback(Output('chart3b', 'figure', allow_duplicate=True), Input('refresh', 'n_clicks'), Input('theme', 'data'), 
+               Input('chart3-options', 'value'), Input('chart3-states', 'value'), Input("plist", 'value'),  Input("diff-list", 'value'),
+               prevent_initial_call='initial_duplicate')
+def chart3b(_, mode, show, state, priority, difficulty):
+    ## Or Make an API call here
+    data = pd.read_csv('data.csv')    
+    sites = pd.read_csv('sites.csv')
+    
+    data = filterByColumn(data, 'Task Priority', priority)
+    data = filterByColumn(data, 'Difficulty', difficulty)
+        
+    data = data['Contract'].value_counts().to_frame().reset_index().sort_values(by='Contract')
+    
+    sites = sites.merge(data, how='inner', left_on='sites', right_on='Contract')
+    if state != 'all':
+        sites = sites[sites['state'].str.lower() == state.lower()]
+    
+    sites, ts = topContracts(sites, show)
+    sites = sites.rename(columns={'count':'Assignments'})
+    
+    map_style = map_styles[1] if 'dark' in mode else map_styles[0]
+    map = px.scatter_map(sites,lat='latitude', lon='longitude', size='Assignments', zoom=1, color='Assignments',
+                         hover_name='Contract', size_max=30,hover_data=['Contract', 'Assignments', 'city'], opacity=0.8,
+                         map_style=map_style, title="Contract Locations", template=mode) 
+    map.update_layout(margin={"r":0,"t":50,"l":0,"b":10}, map_zoom=3, map_center=australian_center, template=mode)
+    # map.update_traces(cluster=dict(enabled=True, size=25), marker=dict(sizemode='diameter', color='royalblue', opacity=0.4, size=5))
+    
+    return map
+
+@app.callback(Output('chart3b', 'figure', allow_duplicate=True), Input('chart3b', 'clickData'),
+            prevent_initial_call='initial_duplicate')
+def chart3b_partial1_onclick(clickData):
+    time.sleep(0.2) # Simulate a delay for the click event also to allow another callback to run first.
+    if clickData is None:
+        raise dash.exceptions.PreventUpdate()
+    
+    patched_figure = Patch()
+    patched_figure["layout"]["map"]['zoom'] = 12
+    patched_figure["layout"]["map"]['center'] = {"lat": clickData['points'][0]['lat'], "lon": clickData['points'][0]['lon']}
+    return patched_figure
 
 @app.callback(Output('chart4', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'))
 def chart4(_, mode):

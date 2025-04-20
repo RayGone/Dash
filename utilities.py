@@ -47,3 +47,16 @@ def arrayMatchAny(search, inArray):
             return True
 
     return False
+
+
+def topContracts(data, show):
+    ts = ''
+    if show != 'all':
+        data = data.sort_values(by='count', ascending=False)
+        if show == '10':
+            ts = ' - Top 10'
+            data = data.iloc[:10]
+        elif show == '20':
+            ts = ' - Top 20'
+            data = data.iloc[:20]
+    return data, ts
