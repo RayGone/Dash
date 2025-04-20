@@ -42,8 +42,8 @@ australian_center = {"lat": -22.867313536366957, "lon": 133.9434557416898}
 app.layout = dbc.Container([
         dcc.Store(id='theme', data="plotly_white"),
         dbc.Row([
-            dbc.Col(),
-            dbc.Col(html.H1("Dashboard", className='display-3 text-center')),
+            dbc.Col(md=12, lg=4),
+            dbc.Col(html.H1("Dashboard", className='display-3 display-md-5 text-center')),
             dbc.Col(html.Div([
                     html.A(href="https://github.com/RayGone/Dash", target="_blank", title='Check Github', className='fa-brands fa-github fa-bounce me-3', style={"fontSize":"20px", "cursor": "pointer"}),
                     dbc.Label(class_name="fa fa-moon pe-2", html_for="switch"),
@@ -55,20 +55,21 @@ app.layout = dbc.Container([
         ],align='center', justify='between', key='row1', class_name='sticky-top shadow-sm mb-3 bg-body'),
 
         dbc.Row([
-            dbc.Col(dbc.Label("Task Priority: ",class_name="me-2"), class_name="col-md-1 col-sm-2"), 
-            dbc.Col([DropDown("plist", value_list=task_priority, persistance=True)], class_name='col-md-5 col-sm-10'),
-            dbc.Col(dbc.Label("Task Difficulty: ",class_name="me-2"), class_name="col-md-1 col-sm-2"), 
-            dbc.Col([DropDown("diff-list", value_list=difficulty, persistance=True)], class_name='col-md-5 col-sm-10')
-        ], align='center', justify='start', key='row2', class_name='d-print-none'),
+            dbc.Col([dbc.Label("Task Priority: ",class_name="me-2 font-weight-light")], xs=3, md=1, align='center'),
+            dbc.Col([DropDown("plist", value_list=task_priority, persistance=True)], md=5, xs=9, align='center'),
+            dbc.Col([dbc.Label("Task Difficulty: ",class_name="me-2 font-weight-light")], md=1, xs=3, align='center'),
+            dbc.Col([DropDown("diff-list", value_list=difficulty, persistance=True)], md=5, xs=9, align='center')
+        ], align='center', justify='start', key='row2', class_name='d-print-none g-1'),
         html.Br(),
         dbc.Row([
             dbc.Col(
                 dbc.Card([
                     dbc.CardBody(dcc.Loading(dcc.Graph(id='chart1', className='bg-primary', config=graph_config)))
-                ]), class_name="col-lg-6", width=6, sm=12),
+                ]), lg=6, md=12),
             dbc.Col(
-                dbc.Card(dbc.CardBody(dcc.Loading(dcc.Graph(id='chart2', className='bg-primary', config=graph_config)))),
-                class_name='col-lg-6', width=6, sm=12)
+                dbc.Card([
+                    dbc.CardBody(dcc.Loading(dcc.Graph(id='chart2', className='bg-primary', config=graph_config)))
+                ]), lg=6, md=12)
         ], class_name='g-2', key='row3', style={"minHeight":"300px"}),
         html.Br(),
         dbc.Row([
@@ -76,19 +77,20 @@ app.layout = dbc.Container([
                     dbc.Card([
                         dbc.CardHeader(
                             dbc.Row([
+                                dbc.Col(dbc.Label("Show Assignments: ", class_name='display-7 pe-2'), xs=4, md=2),
                                 dbc.Col([
-                                    dbc.Label("Show Assignments: ", className='display-7 pe-2'),
                                     dcc.RadioItems(id='chart3-options', value='all', inline=True,
                                         options=[{'label': 'All', 'value': 'all'},
                                                 {'label': 'Top 10', 'value': '10'},
                                                 {'label': 'Top 20', 'value': '20'}], 
                                         labelClassName='me-2 border border-start-0 pe-2 py-1', inputClassName='form-check-input me-2')
-                                    ], className='d-inline-flex flex-row align-items-center'),
+                                    ], md=4, xs=8),
+                                
+                                dbc.Col(dbc.Label("State: ", class_name='display-7 pe-2'), xs=4, md=2),
                                 dbc.Col([
-                                    dbc.Label("State: ", className='display-7 pe-2 ps-2'),
-                                    DropDown("chart3-states", value_list=states, default_value="All", persistance=True, style={"width":"200px"})
-                                ], className='d-inline-flex flex-row align-items-center')
-                            ])),
+                                    DropDown("chart3-states", value_list=states, default_value="All", persistance=True)
+                                ], align='center', md=4, xs=8),
+                            ], className='g-1 d-print-none', align='center', justify='start')),
                         dbc.CardBody([
                             dcc.Loading(dcc.Graph(id='chart3a', className='bg-primary', config=graph_config)),
                             html.Hr(),
@@ -108,11 +110,11 @@ app.layout = dbc.Container([
             dbc.Col(
                 dbc.Card([
                     dbc.CardBody(dcc.Loading(dcc.Graph(id='chart4', className='bg-primary', config=graph_config)))
-                ]), class_name="col-lg-6"),
+                ]), lg=6, md=12),
             dbc.Col(
                 dbc.Card([
                     dbc.CardBody(dcc.Loading(dcc.Graph(id='chart5', className='bg-primary', config=graph_config)))
-                ]), class_name="col-lg-6", width=6, sm=12)
+                ]), lg=6, md=12)
         ], class_name='g-2', key='row6', style={"minHeight":"300px"}),
         html.Br(),
         dbc.Row(
@@ -214,7 +216,7 @@ def chart3b(_, mode, show, state, priority, difficulty):
     map = px.scatter_map(sites,lat='latitude', lon='longitude', size='Assignments', zoom=1, color='Assignments',
                          hover_name='Contract', size_max=30,hover_data=['Contract', 'Assignments', 'city'], opacity=0.8,
                          map_style=map_style, title="Contract Locations", template=mode) 
-    map.update_layout(margin={"r":0,"t":50,"l":0,"b":10}, map_zoom=3, map_center=australian_center, template=mode)
+    map.update_layout(margin={"r":0,"t":50,"l":0,"b":10}, map_zoom=3, template=mode) #map_center=australian_center,
     # map.update_traces(cluster=dict(enabled=True, size=25), marker=dict(sizemode='diameter', color='royalblue', opacity=0.4, size=5))
     
     return map
