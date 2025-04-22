@@ -1,6 +1,6 @@
 import dash
 from plotly import express as px
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, Patch, State
 import dash_bootstrap_components as dbc
 from utilities import difficulty, difficulty_color_map, graph_config, DropDown, \
     task_priority, task_priority_color_map, filterByColumn, isDebug, topContracts
