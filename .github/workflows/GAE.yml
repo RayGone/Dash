@@ -5,9 +5,10 @@ on:
   push:
     branches:
       - main
+      - redeploy
     paths:
       - 'app.yaml'
-      - '*.py'
+      - '**/*.py'
       - '*.csv'
 
 jobs:

@@ -18,8 +18,7 @@ from dash.dependencies import Input, Output, State
 ######======================================
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from utilities import difficulty, difficulty_color_map, graph_config, DropDown, \
-    task_priority, task_priority_color_map, filterByColumn, isDebug, topContracts
+from utilities import isDebug
 
 base = 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.css'
 theme = str(dbc.themes.CERULEAN)
