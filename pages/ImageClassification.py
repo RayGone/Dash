@@ -10,18 +10,18 @@ from io import BytesIO
 from PIL import Image
 
 import torch
-from torchvision.models import mobilenet_v3_large, MobileNet_V3_Large_Weights
+from torchvision.models import mobilenet_v3_small, MobileNet_V3_Small_Weights
 from torchvision.transforms import transforms
 
 dash.register_page(__name__, path='/cv', name='Image Classification', title="Image Classification", description="Image Classification using MobileNetV3 Large")
 
-model = mobilenet_v3_large(weights=MobileNet_V3_Large_Weights.IMAGENET1K_V2)
+model = mobilenet_v3_small(weights=MobileNet_V3_Small_Weights.IMAGENET1K_V1)
 
 layout = dbc.Container([
         dbc.Row([            
             dbc.Col(width=12, children=[
                 html.H4("Upload an image to classify it using a pre-trained model.", className="text-center"), html.Br(),
-                dbc.Label("The model used is MobileNetV3 Large with IMAGENET1K_V2 weights from PyTorch.", className='text-start mb-2'),
+                dbc.Label("The model used is MobileNet-V3-Small with IMAGENET1K_V1 weights from PyTorch.", className='text-start mb-2'),
             ]),
         ], class_name='mb-3'),
         dcc.Upload(id='upload-data',
