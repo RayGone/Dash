@@ -4,6 +4,7 @@
 *pdf
 test*
 .git*
+*.ipynb
 
 .DS_Store
 

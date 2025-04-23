@@ -18,8 +18,7 @@ from dash.dependencies import Input, Output, State
 ######======================================
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from utilities import difficulty, difficulty_color_map, graph_config, DropDown, \
-    task_priority, task_priority_color_map, filterByColumn, isDebug, topContracts
+from utilities import isDebug
 
 base = 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.css'
 theme = str(dbc.themes.CERULEAN)
@@ -63,9 +62,9 @@ app.layout = dbc.Container([
             dbc.Col(html.H2("Dashboard",id="header-title", className='display-4 text-center pt-2 pb-2'), xs=10, md=6),
             dbc.Col(html.Div([
                     html.A(href="https://github.com/RayGone/Dash", target="_blank", title='Check Github', className='fa-brands fa-github fa-bounce me-3', style={"fontSize":"20px", "cursor": "pointer"}),
-                    dbc.Label(class_name="fa fa-moon pe-2", html_for="switch"),
+                    dbc.Label(class_name="fa fa-moon pe-2", html_for="switch", style={"color":"silver", "textShadow":"1px 0 2px black"}),
                     dbc.Switch(id="switch", value=True, class_name="d-inline-block", persistence=True),
-                    dbc.Label(class_name="fa fa-sun", html_for="switch")
+                    dbc.Label(class_name="fa fa-sun", html_for="switch", style={"color":"#EABF14", "textShadow":"1px 1px 2px #aaa, 0 0 2px #EABF14"})
                 ], className='d-inline-block float-end d-print-none', style={"whiteSpace":"nowrap"}), align='center', md=3)
         ],align='center', justify='between', key='row1', class_name='sticky-top shadow-sm mb-3 bg-body'),
         
