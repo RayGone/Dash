@@ -9,4 +9,6 @@ test*
 .DS_Store
 
 __pycache__
-dashboard
+
+## Can't run / install pytorch in App Enginge right now - not enough resource in free tier.
+**/ImageClassification.py

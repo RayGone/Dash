@@ -3,6 +3,7 @@
 *.json
 *pdf
 test*
+.env
 
 .DS_Store
 
