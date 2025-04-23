@@ -90,7 +90,7 @@ layout = dbc.Row(
               Input('theme', 'data'), Input("plist", 'value'), Input("diff-list", 'value'))
 def chart1(_, mode, priority, difficulty):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')
+    data = pd.read_csv('./data/data.csv')
     data = filterByColumn(data, 'Task Priority', priority)
         
     data = data[['Staff', 'Difficulty', 'Created']].groupby(["Staff", 'Difficulty'])['Created'].count().to_frame().reset_index()
@@ -108,7 +108,7 @@ def chart1(_, mode, priority, difficulty):
               Input("plist", 'value'),  Input("diff-list", 'value'))
 def chart2(_, mode, priority, difficulty):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')
+    data = pd.read_csv('./data/data.csv')
     data = filterByColumn(data, 'Task Priority', priority)
     data = filterByColumn(data, 'Difficulty', difficulty)
         
@@ -125,13 +125,13 @@ def chart2(_, mode, priority, difficulty):
               Input('chart3-options', 'value'), Input('chart3-states', 'value'), Input("plist", 'value'),  Input("diff-list", 'value'))
 def chart3a(_, mode, show, state, priority, difficulty):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')    
+    data = pd.read_csv('./data/data.csv')    
     data = filterByColumn(data, 'Task Priority', priority)
     data = filterByColumn(data, 'Difficulty', difficulty)    
     data = data['Contract'].value_counts().to_frame().reset_index().sort_values(by='Contract')
     total = data.shape[0]
     
-    sites = pd.read_csv('sites.csv')
+    sites = pd.read_csv('./data/sites.csv')
     data = data.merge(sites, how='inner', right_on='sites', left_on='Contract')
     if state != 'all':
         data = data[data['state'].str.lower() == state.lower()]
@@ -154,8 +154,8 @@ def chart3a(_, mode, show, state, priority, difficulty):
                prevent_initial_call='initial_duplicate')
 def chart3b(_, mode, show, state, priority, difficulty):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')    
-    sites = pd.read_csv('sites.csv')
+    data = pd.read_csv('./data/data.csv')    
+    sites = pd.read_csv('./data/sites.csv')
     
     data = filterByColumn(data, 'Task Priority', priority)
     data = filterByColumn(data, 'Difficulty', difficulty)
@@ -193,7 +193,7 @@ def chart3b_partial1_onclick(clickData):
 @dash.callback(Output('chart4', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'))
 def chart4(_, mode):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')
+    data = pd.read_csv('./data/data.csv')
     total = data.shape[0]
     
     data = data['Task Priority'].value_counts().to_frame().reset_index().sort_values(by='Task Priority')
@@ -205,7 +205,7 @@ def chart4(_, mode):
 @dash.callback(Output('chart5', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'))
 def chart5(_, mode):
     ## Or Make an API call here
-    data = pd.read_csv('data.csv')
+    data = pd.read_csv('./data/data.csv')
     total = data.shape[0]
     
     data = data['Difficulty'].value_counts().to_frame().reset_index()
@@ -217,7 +217,7 @@ def chart5(_, mode):
 @dash.callback(Output('chart6', 'figure'), Input('refresh', 'n_clicks'), Input('theme', 'data'))
 def chart6(_, mode):
     ## Or Make an API call here
-    history = pd.read_csv('summary_history.csv')
+    history = pd.read_csv('./data/summary_history.csv')
     history = history.melt(id_vars='Date', value_vars=["Immediate","Priority 1", "Priority 2", "Priority 3"], var_name='Task Priority', value_name='Count')
     
     fig = px.line(history, title="Priority Summary History", x = "Date", y="Count", color="Task Priority", markers=True, template=mode, color_discrete_map=task_priority_color_map)

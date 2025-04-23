@@ -76,11 +76,11 @@ def eval_model(image: Image.Image, topK =5):
     
     try:
         classes = []
-        imgnet_class = pd.read_csv('imagenet_class_list.csv')
+        imgnet_class = pd.read_csv('./data/imagenet_class_list.csv')
         classes = imgnet_class[imgnet_class['id'].isin(topk_catid.tolist())]['label'].tolist()
         return topk_prob.tolist(), classes
     except FileNotFoundError:
-        print("imagenet_class_index.csv file not found.")
+        print("imagenet_class_list.csv file not found.")
         pass
     
     return topk_catid.tolist() # Return the predicted class index
