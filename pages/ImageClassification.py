@@ -13,14 +13,14 @@ import torch
 from torchvision.models import mobilenet_v3_large, MobileNet_V3_Large_Weights
 from torchvision.transforms import transforms
 
-dash.register_page(__name__, path='/cv', name='Image Classification')
+dash.register_page(__name__, path='/cv', name='Image Classification', title="Image Classification", description="Image Classification using MobileNetV3 Large")
 
 model = mobilenet_v3_large(weights=MobileNet_V3_Large_Weights.IMAGENET1K_V2)
 
 layout = dbc.Container([
         dbc.Row([            
             dbc.Col(width=12, children=[
-                dbc.Label("Upload an image to classify it using a pre-trained model.", class_name=""),
+                html.H4("Upload an image to classify it using a pre-trained model.", className="text-center"), html.Br(),
                 dbc.Label("The model used is MobileNetV3 Large with IMAGENET1K_V2 weights from PyTorch.", className='text-start mb-2'),
             ]),
         ], class_name='mb-3'),
@@ -35,12 +35,12 @@ layout = dbc.Container([
                 'lineHeight': '30px',
                 'borderStyle': 'dashed',
             },
-            className_active='dropdown-active-bg'),
+            className_active='upload-dragdrop-active-bg'),
         dbc.Row([
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader(id='image-upload-name', className='text-start'),
-                    dbc.CardBody(dcc.Loading(html.Div(id='output-image-upload', children=[dbc.Label("No Image Uploaded!!")], className='w-100 text-center', style={"minHeight":"300px"}), type="circle")),
+                    # dbc.CardHeader(id='image-upload-name', className='text-start'),
+                    dbc.CardBody(dcc.Loading(html.Div(id='output-image-upload', children=[dbc.Label("No Image Uploaded!!")], className='w-100 text-center', style={"minHeight":"200px"}), type="circle")),
                 ], class_name="w-100"),
                 sm=12, md=8, className='text-center mt-3'),
             dbc.Col(dbc.Card(
@@ -99,10 +99,14 @@ def update_output( contents, filename):
         topK_prob, topK_class = eval_model(image)
         
         output = [html.H4("Top 5 - Model Output: ", className='card-title font-weight-bold'), html.Hr(),
-                  *[
-                    dbc.Label([html.Span(f"Class: {topK_class[i]}"), html.Br(), html.Span(f"Probability: {topK_prob[i]:.4f}"), html.Br()], class_name="mb-2 border w-100 rounded-1 p-1")
+                *[
+                    html.P([
+                        dbc.Label([html.B(f"Label: "), html.Span(f" {topK_class[i]}")], class_name="mb-1 w-100"),
+                        dbc.Label([html.B("Probability: "), html.Span(f" {topK_prob[i]:.4f}")], class_name="mb-1 w-100"),
+                        html.Br()
+                    ], className="mb-2 border w-100 rounded-1 p-1")
                     for i in range(len(topK_prob))
                 ]]
-        return [html.Div(dbc.Label("File Name: "+filename, class_name="card-title text-start"), className='text-start'), html.Img(src=contents, className='w-100')], output
+        return [html.Div(dbc.Label("File Name: "+filename, class_name="card-title text-start"), className='text-start'), dbc.CardImg(src=contents, class_name='w-100', bottom=True)], output
         
     return dash.no_update
