@@ -40,6 +40,7 @@ app = dash.Dash(
 # print(list(templates))
 ### Alternative is to use Dash Leaflet - But on App Engine additional packages may limit Free Tier usage.
 australian_center = {"lat": -22.867313536366957, "lon": 133.9434557416898}
+not_display_nav = '' if len(dash.page_registry.values()) > 1 else ' d-none'
 
 app.layout = dbc.Container([
         dcc.Store(id='theme', data="plotly_white"),
@@ -53,7 +54,7 @@ app.layout = dbc.Container([
                                 page['name'], id=page['name'], href=page["path"], class_name='dropdown-item-sm rounded-0'
                             ) for page in dash.page_registry.values()
                         ],
-                        class_name='dropdown-menu-sm d-lg-none rounded-0 bg-body',
+                        class_name='dropdown-menu-sm d-lg-none rounded-0 bg-body'+ not_display_nav,
                         size='sm',
                         # color='dark',
                         id='nav-menu',
@@ -83,7 +84,7 @@ app.layout = dbc.Container([
                 vertical=True,
                 pills=True,
                 style={"top": "100px", "minWidth": "200px", "height": "calc(100vh - 120px)"},
-                class_name="d-none d-lg-block sticky-bottom pt-1 start-0 border-0 rounded-top bg-body d-print-none bg-gradient",
+                class_name="d-none sticky-bottom pt-1 start-0 border-0 rounded-top bg-body d-print-none bg-gradient" + ' d-lg-block' if not not_display_nav else not_display_nav,
                 id="sidebar",
             ),
             html.Div(dash.page_container, className="flex-grow-1 flex-shrinkable ms-2")
