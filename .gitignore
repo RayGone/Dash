@@ -6,6 +6,7 @@ test*
 .env
 
 .DS_Store
+*.keras
 
 __pycache__
 dashboard

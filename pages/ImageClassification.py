@@ -13,7 +13,7 @@ import torch
 from torchvision.models import mobilenet_v3_small, MobileNet_V3_Small_Weights
 from torchvision.transforms import transforms
 
-dash.register_page(__name__, path='/cv', name='Image Classification', title="Image Classification", description="Image Classification using MobileNetV3 Large")
+dash.register_page(__name__, path='/cv/imagenet', name='ImageNet Classification', title="ImageNet Classification", description="Image Classification using MobileNetV3 Large")
 
 model = mobilenet_v3_small(weights=MobileNet_V3_Small_Weights.IMAGENET1K_V1)
 
@@ -25,7 +25,7 @@ layout = dbc.Container([
             ]),
         ], class_name='mb-3'),
         dcc.Upload(id='upload-data',
-            max_size=1024*1024*5,  # 10MB
+            max_size=1024*1024*1.5,  # 1.5MB
             accept='image/*',
             children=html.Div([
                 dbc.Label('Drag and Drop or Select Files', style={"cursor":"pointer"}),
