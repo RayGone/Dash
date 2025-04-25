@@ -6,6 +6,8 @@ import os
 import datetime
 import time
 
+os.environ['dash_app_root'] = os.path.dirname(os.path.abspath(__file__))
+
 import pandas as pd
 import dash
 from dash import html
